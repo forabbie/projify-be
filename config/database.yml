@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: postgres
+  password: root
+
+development:
+  <<: *default
+  database: projify_be_development
+
+test:
+  <<: *default
+  database: projify_be_test
+
+production:
+  <<: *default
+  database: projify_be_production
+  username: projify_be
+  password: <%= ENV["PROJIFY_BE_DATABASE_PASSWORD"] %>
