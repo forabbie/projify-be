@@ -63,11 +63,12 @@ Explain how to use your API application. Provide code examples, API endpoints, a
 rails rspec
 ```
 
+### Tech Stack
+
+### Libraries
+
 ### Contributing
 
 Provide guidelines for other developers who want to contribute to your project. Include information on how to submit bug reports, feature requests, or pull requests.
 
 ### License
-
-Specify the license for your API application. For example:
-This project is licensed under the MIT License.
