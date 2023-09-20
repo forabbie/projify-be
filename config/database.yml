@@ -15,6 +15,7 @@ test:
 
 production:
   <<: *default
-  # database: projify_be_production
-  # username: projify_be
+  database: projify_be_production
+  username: projify_be
   password: <%= ENV["PROJIFY_BE_DATABASE_PASSWORD"] %>
+  url: <%= ENV['DATABASE_URL'] %>
