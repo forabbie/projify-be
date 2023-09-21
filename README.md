@@ -9,9 +9,8 @@ Short description or tagline of your API application.
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-- [Usage](#usage)
-- [API Documentation](#api-documentation)
-- [Configuration](#configuration)
+- [Tech Stack](#tech-stack)
+- [Libraries](#libraries)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
@@ -54,7 +53,33 @@ cd projify-be
 bundle
 ```
 
-### Usage
+### Tech Stack
+Frontend 
+
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![Vue](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
+
+Backend
+
+![Rails](https://img.shields.io/badge/rails-%23CC0000.svg?style=for-the-badge&logo=ruby-on-rails&logoColor=white)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+
+### Libraries
+
+```bash
+# enabled
+gem "rack-cors"
+
+# added
+gem 'devise'
+gem 'devise-jwt'
+gem 'jsonapi-jsonapi'
+```
+
+### Testing
 
 Explain how to use your API application. Provide code examples, API endpoints, and any necessary details.
 
@@ -62,10 +87,6 @@ Explain how to use your API application. Provide code examples, API endpoints, a
 # Run tests
 rails rspec
 ```
-
-### Tech Stack
-
-### Libraries
 
 ### Contributing
 
