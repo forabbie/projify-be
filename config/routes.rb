@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      # get '/user/index'
+      get '/user/index'
       get '/users/current', to: 'user#logged_user'
     end
   end
