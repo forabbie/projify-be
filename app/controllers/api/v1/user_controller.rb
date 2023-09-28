@@ -5,7 +5,7 @@ class Api::V1::UserController < ApplicationController
     @user = User.all
   end
 
-  def logged_user
+  def active_user
     render json: authenticated_user , status: :ok
   end
 end
