@@ -20,16 +20,9 @@ class Users::SessionsController < Devise::SessionsController
       current_user = User.find(jwt_payload['sub'])
     end
     
-    if current_user
-      render json: {
-        status: 200,
-        message: 'Logged out successfully.'
-      }, status: :ok
-    else
-      render json: {
-        status: 401,
-        message: "Couldn't find an active session."
-      }, status: :unauthorized
-    end
+  render json: {
+    status: current_user ? 200 : 401,
+    message: current_user ? 'Logged out successfully.' : "Couldn't find an active session."
+  }, status: :ok
   end
 end
