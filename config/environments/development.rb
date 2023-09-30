@@ -39,7 +39,19 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = false
 
   config.action_mailer.perform_caching = false
+  # Email Configuration
+  config.action_mailer.perform_deliveries = true
 
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:              Rails.application.credentials.smtp_dev[:address_key],
+    port:                 587,
+    domain:               'localhost:3001',
+    user_name:            Rails.application.credentials.smtp_dev[:username_key],
+    password:             Rails.application.credentials.smtp_dev[:password_key],
+    authentication:       :plain,
+    enable_starttls_auto: true
+  }
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

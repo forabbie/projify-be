@@ -6,6 +6,6 @@ class Api::V1::UserController < ApplicationController
   end
 
   def active_user
-    render json: authenticated_user , status: :ok
+    render json: active_session , status: :ok
   end
 end
