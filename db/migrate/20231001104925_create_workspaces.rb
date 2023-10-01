@@ -1,4 +1,4 @@
-class CreateWorkspace < ActiveRecord::Migration[7.0]
+class CreateWorkspaces < ActiveRecord::Migration[7.0]
   def change
     create_table :workspaces do |t|
       t.string :name
