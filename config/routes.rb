@@ -3,6 +3,9 @@ Rails.application.routes.draw do
     namespace :v1 do
       get '/user/index'
       get '/users/current', to: 'user#active_user'
+      resources :workspaces
+      # resources :workspace
+      # post '/workspace'
     end
   end
   devise_for :users, path: '', path_names: {
