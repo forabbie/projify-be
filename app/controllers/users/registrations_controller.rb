@@ -64,16 +64,24 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # end
   
   private
-  def respond_with(current_user, _opts = {})
+  def respond_with(resource, _opts = {})
     if resource.persisted?
-      render json: {
-        status: {code: 200, message: 'Signed up successfully.'},
-        data: UserSerializer.new(current_user).serializable_hash[:data][:attributes]
-      }
+  
+      workspace = Workspace.create(name: "Main Workspace", user: resource)
+      if workspace.valid?
+        render json: {
+          status: { code: 200, message: 'Signed up successfully.' },
+          data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
+        }
+      else
+        resource.destroy # Rollback user creation if workspace creation fails
+        render json: { error: "Failed to create a new workspace" }, status: :unprocessable_entity
+      end
     else
       render json: {
-        status: {message: "User couldn't be created successfully. #{current_user.errors.full_messages.to_sentence}"}
+        status: { message: "User couldn't be created successfully. #{resource.errors.full_messages.to_sentence}" }
       }, status: :unprocessable_entity
     end
   end
+  
 end
