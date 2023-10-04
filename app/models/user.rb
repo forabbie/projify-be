@@ -1,5 +1,7 @@
 class User < ApplicationRecord
-  has_many :workspace
+  has_many :workspaces
+  has_many :user_workspaces
+  has_many :workspaces, through: :user_workspaces
   
   include Devise::JWT::RevocationStrategies::JTIMatcher
   # Include default devise modules. Others available are:
