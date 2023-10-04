@@ -65,23 +65,41 @@ class Users::RegistrationsController < Devise::RegistrationsController
   
   private
   def respond_with(resource, _opts = {})
-    if resource.persisted?
+    return render_user_creation_error(resource) unless resource.persisted?
   
-      workspace = Workspace.create(name: "Main Workspace", user: resource)
-      if workspace.valid?
-        render json: {
-          status: { code: 200, message: 'Signed up successfully.' },
-          data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
-        }
-      else
-        resource.destroy # Rollback user creation if workspace creation fails
-        render json: { error: "Failed to create a new workspace" }, status: :unprocessable_entity
-      end
+    workspace = Workspace.new(name: "Main Workspace", user: resource)
+  
+    if workspace.save
+      user_workspace = UserWorkspace.create(workspace: workspace, user: resource, role: "admin")
+      return render_user_creation_error(resource) unless user_workspace.save
+  
+      render_success_response(resource)
     else
-      render json: {
-        status: { message: "User couldn't be created successfully. #{resource.errors.full_messages.to_sentence}" }
-      }, status: :unprocessable_entity
+      render_workspace_creation_error(resource)
     end
   end
   
+  def render_success_response(resource)
+    render json: {
+      status: { code: 200, message: 'Signed up successfully.' },
+      data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
+    }
+  end
+  
+  def render_user_creation_error(resource)
+    resource.destroy
+    render json: {
+      status: { message: 'Failed to create user workspace association.' },
+      errors: resource.errors.full_messages
+    }, status: :unprocessable_entity
+  end
+  
+  def render_workspace_creation_error(resource)
+    resource.destroy
+    render json: {
+      status: { message: 'Failed to create a new workspace.' }
+    }, status: :unprocessable_entity
+  end
+  
+
 end

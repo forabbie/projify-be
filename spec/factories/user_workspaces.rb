@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :workspace_user do
+  factory :user_workspace do
     workspace { nil }
     user { nil }
   end

@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::API
-  include JwtWrapper
+  # include JwtWrapper
 
   before_action :configure_permitted_parameters, if: :devise_controller?
 

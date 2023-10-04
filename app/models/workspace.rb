@@ -1,5 +1,8 @@
 class Workspace < ApplicationRecord
   belongs_to :user
+  has_many :projects
+  has_many :user_workspaces
+  has_many :users, through: :user_workspaces
   validates_presence_of :name
 
   # def self.create_new_workspace(workspace_params)
