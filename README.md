@@ -54,12 +54,12 @@ bundle
 ```
 
 ### Tech Stack
-Frontend 
+
+Frontend
 
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
 ![Vue](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D)
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
 
 Backend
 
@@ -76,7 +76,15 @@ gem "rack-cors"
 # added
 gem 'devise'
 gem 'devise-jwt'
-gem 'jsonapi-jsonapi'
+gem 'jsonapi-serializer'
+gem "pry"
+
+# for unit test
+
+gem "rspec-rails"
+gem "factory_bot_rails"
+gem 'faker'
+gem 'database_cleaner'
 ```
 
 ### Testing
