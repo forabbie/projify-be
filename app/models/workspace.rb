@@ -1,6 +1,7 @@
 class Workspace < ApplicationRecord
   belongs_to :user
   has_many :projects
+  has_many :invitations
   has_many :user_workspaces
   has_many :users, through: :user_workspaces
   validates_presence_of :name

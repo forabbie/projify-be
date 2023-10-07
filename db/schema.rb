@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_10_04_030618) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_04_040705) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "recipient_email"
+    t.string "token"
+    t.boolean "accepted"
+    t.bigint "workspace_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_invitations_on_user_id"
+    t.index ["workspace_id"], name: "index_invitations_on_workspace_id"
+  end
 
   create_table "projects", force: :cascade do |t|
     t.string "title"
@@ -94,6 +106,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_04_030618) do
     t.index ["user_id"], name: "index_workspaces_on_user_id"
   end
 
+  add_foreign_key "invitations", "users"
+  add_foreign_key "invitations", "workspaces"
   add_foreign_key "projects", "workspaces"
   add_foreign_key "tasks", "task_priorities"
   add_foreign_key "tasks", "task_statuses"
