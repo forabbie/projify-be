@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Invitation to Collaborate</title>
+    <style>
+      /* Add your email styles here */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      p {
+        color: #666;
+      }
+
+      .cta-button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>You're Invited!</h1>
+      <p>You have been invited to join the workspace "<%= @workspace_name %>." Click the button below to get started:</p>
+      <a class="cta-button" href="<%= @invitation_url %>">Accept Invitation</a>
+      <p>If you have any questions, feel free to contact us at <a href="mailto:info@example.com">info@example.com</a>.</p>
+    </div>
+  </body>
+</html>

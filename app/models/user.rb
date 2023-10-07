@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_many :workspaces
+  has_many :sent_invitations, class_name: 'Invitation', foreign_key: 'user_id'
   has_many :user_workspaces
   has_many :workspaces, through: :user_workspaces
   
@@ -18,4 +19,13 @@ class User < ApplicationRecord
   #     false
   #   end
   # end
+
+  def self.exists_with_email?(email)
+    where(email: email).exists?
+  end
+
+  def recipient_email_has_account?(email)
+    user = User.find_by(email: email)
+    return user.present?
+  end
 end

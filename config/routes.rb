@@ -1,18 +1,22 @@
 Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
-      get 'projects/index'
-      get 'projects/create'
-      get 'projects/update'
-      get 'projects/destroy'
-      get '/user/index'
+      resources :users, only: [:index]
       get '/users/current', to: 'users#active_user'
       get '/workspaces/all', to: 'workspaces#all_workspace'
+      get '/invitations', to: 'invitations#sent_invitations'
+      get '/invitations/validate', to: 'invitations#validate_invitation'
+      post '/invitations/accept' => 'invitations#accept_invitation'
       resources :workspaces do
-        resources :projects do
+        resources :projects, only: [:create, :index] do
           # get 'users', on: :user
-          put 'add_user', on: :member  
+          post 'add_user', on: :member
         end
+        post '/invitations/send', to: 'invitations#send_invitation'
+        resources :invitations, only: [:create, :index] do
+          # post 'accept', to: 'invitations#accept_invitation', on: :member
+          post 'decline', to: 'invitations#decline_invitation', on: :member
+        end                       
       end
     end
   end
