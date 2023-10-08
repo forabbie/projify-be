@@ -6,10 +6,21 @@ class Users::SessionsController < Devise::SessionsController
   
   private
   def respond_with(current_user, _opts = {})
+    @user = current_user
+    @workspaces = Workspace.where(user_id: @user.id)
+
+    workspace_data = @workspaces.map do |workspace|
+      workspace_attributes = WorkspaceSerializer.new(workspace).serializable_hash[:data][:attributes]
+      workspace_attributes
+    end
+
     render json: {
       status: { 
-        code: 200, message: 'Logged in successfully.',
-        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+        code: 200, message: 'Logged in successfully.'
+      },
+      data: { 
+        user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
+        workspace: { id: workspace_data[0] }
       }
     }, status: :ok
   end

@@ -10,6 +10,9 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def active_user
-    render json: active_session , status: :ok
+    render json: {
+      status: { code: 200, message: 'User retrieve successfully.' },
+      data: UserSerializer.new( active_session ).serializable_hash[:data][:attributes]
+    }
   end
 end

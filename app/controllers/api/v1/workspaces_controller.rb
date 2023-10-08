@@ -7,9 +7,17 @@ class Api::V1::WorkspacesController < ApplicationController
   def index
     @user = current_user
     @workspaces = @user.workspaces
+
+    workspace_data = @workspaces.map do |workspace|
+      workspace_attributes = WorkspaceSerializer.new(workspace).serializable_hash[:data][:attributes]
+      is_creator = (workspace.user == @user) # Check if the current user is the creator
+      workspace_attributes[:is_creator] = is_creator
+      workspace_attributes
+    end
+
     render json: {
       status: { code: 200, message: 'Workspace retrieve successfully.' },
-      data: @workspaces.map { |workspace| WorkspaceSerializer.new(workspace).serializable_hash[:data][:attributes] }
+      data: workspace_data
     }
   end
 

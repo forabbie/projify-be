@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sent_invitations, class_name: 'Invitation', foreign_key: 'user_id'
   has_many :user_workspaces
   has_many :workspaces, through: :user_workspaces
+  has_many :user_projects
   
   include Devise::JWT::RevocationStrategies::JTIMatcher
   # Include default devise modules. Others available are:

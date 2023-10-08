@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       get '/invitations', to: 'invitations#sent_invitations'
       get '/invitations/validate', to: 'invitations#validate_invitation'
       post '/invitations/accept' => 'invitations#accept_invitation'
+      get 'projects/all', to: 'projects#all_projects'
       resources :workspaces do
         resources :projects, only: [:create, :index] do
           # get 'users', on: :user
