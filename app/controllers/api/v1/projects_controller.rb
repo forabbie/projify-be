@@ -1,14 +1,17 @@
 class Api::V1::ProjectsController < ApplicationController
+  before_action :authenticate_user!
   before_action :authorize_workspace_membership, only: [:create, :update]
 
   def index
-    @project = Project.all
+    user = current_user
+    selected_workspace = Workspace.find(params[:workspace_id])
+
+    user_projects_in_workspace = user.user_projects.where(project_id: selected_workspace.projects.pluck(:id))
+    projects_in_workspace = user_projects_in_workspace.map(&:project)
+
     render json: {
-      status: {
-        code: 200,
-        message: 'Projects retrieve successfully.'
-      },
-      data: @project.map { |project| ProjectSerializer.new(project).serializable_hash[:data][:attributes] }
+      status: { code: 200, message: 'Projects retrieved successfully.' },
+      data: projects_in_workspace
     }
   end
 
@@ -47,10 +50,16 @@ class Api::V1::ProjectsController < ApplicationController
   def destroy
   end
 
-  # def users
-  #   @project_users = (@project.users + (User.where(tenant_id: @tenant.id, is_admin: true))) - [current_user]
-  #   @other_users = @tenant.users.where(is_admin: false) - (@project_users + [current_user])
-  # end
+  def all_projects
+    @project = Project.all
+    render json: {
+      status: {
+        code: 200,
+        message: 'Projects retrieve successfully.'
+      },
+      data: @project.map { |project| ProjectSerializer.new(project).serializable_hash[:data][:attributes] }
+    }
+  end
 
   def add_user
     @project = Project.find(params[:id])
@@ -82,14 +91,6 @@ class Api::V1::ProjectsController < ApplicationController
   def set_workspace
     @workspace = Tenant.find(params[:workspace_id])
   end
-
-  # def verify_workspace
-  #   unless params[:workspace_id] == Tenant.current_workspace_id.to_s
-  #   render json: {
-  #     status: { message: "You are not authorized to access any organization other than your own" }
-  #   }
-  #   end
-  # end
 
   def authorize_workspace_membership
     @workspace = Workspace.find(params[:workspace_id])

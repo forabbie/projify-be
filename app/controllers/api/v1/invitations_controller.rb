@@ -15,7 +15,10 @@ class Api::V1::InvitationsController < ApplicationController
       invitee = User.find_by(email: invitation.recipient_email)
   
       if invitee
-        render json: { error: 'Already has an account.' }, status: :unprocessable_entity
+        render json: { 
+          message: 'Already has an account.',
+          data: InvitationsSerializer.new(invitation).serializable_hash[:data][:attributes] 
+        }
       else
         render json: {
           message: 'Valid Invitation.',
@@ -51,7 +54,7 @@ class Api::V1::InvitationsController < ApplicationController
     # Determine the URL based on whether the recipient has an account
     if current_user.recipient_email_has_account?(recipient_email)
       # URL for users with accounts
-      invitation_url = "http://localhost:5173/auth/invitation/accept?token=#{invitation.token}"
+      invitation_url = "http://localhost:5173/auth/invitation/signin?token=#{invitation.token}"
     else
       # URL for users who need to sign up first
       invitation_url = "http://localhost:5173/auth/invitation/signup?token=#{invitation.token}"

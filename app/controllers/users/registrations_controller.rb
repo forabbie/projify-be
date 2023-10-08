@@ -73,17 +73,16 @@ class Users::RegistrationsController < Devise::RegistrationsController
       user_workspace = UserWorkspace.create(workspace: workspace, user: resource, role: "admin")
       return render_user_creation_error(resource) unless user_workspace.save
   
-      render_success_response(resource)
+      render json: {
+        status: { code: 200, message: 'Signed up successfully.' },
+        data: {
+          user: UserSerializer.new(resource).serializable_hash[:data][:attributes],
+          workspace: { id: workspace.id }
+        }
+      }
     else
       render_workspace_creation_error(resource)
     end
-  end
-  
-  def render_success_response(resource)
-    render json: {
-      status: { code: 200, message: 'Signed up successfully.' },
-      data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
-    }
   end
   
   def render_user_creation_error(resource)
