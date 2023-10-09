@@ -2,21 +2,21 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :users, only: [:index]
-      get '/users/current', to: 'users#active_user'
-      get '/workspaces/all', to: 'workspaces#all_workspace'
-      get '/invitations', to: 'invitations#sent_invitations'
-      get '/invitations/validate', to: 'invitations#validate_invitation'
+      get '/users/current' => 'users#active_user'
+      get '/workspaces/all' => 'workspaces#all_workspace'
+      get '/invitations' => 'invitations#sent_invitations'
+      get '/invitations/validate' => 'invitations#validate_invitation'
+      get '/projects/all' => 'projects#all_projects'
       post '/invitations/accept' => 'invitations#accept_invitation'
-      get 'projects/all', to: 'projects#all_projects'
       resources :workspaces do
         resources :projects, only: [:create, :index] do
           # get 'users', on: :user
           post 'add_user', on: :member
         end
-        post '/invitations/send', to: 'invitations#send_invitation'
+        post '/invitations/send' => 'invitations#send_invitation'
         resources :invitations, only: [:create, :index] do
-          # post 'accept', to: 'invitations#accept_invitation', on: :member
-          post 'decline', to: 'invitations#decline_invitation', on: :member
+          # post 'accept' => 'invitations#accept_invitation', on: :member
+          post 'decline' => 'invitations#decline_invitation', on: :member
         end                       
       end
     end

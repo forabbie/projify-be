@@ -21,6 +21,26 @@ class Api::V1::WorkspacesController < ApplicationController
     }
   end
 
+  def show
+    @workspace = Workspace.find(params[:id])
+    @members = @workspace.user_workspaces.includes(:user) # Include user associations for each user_workspace
+  
+    render json: {
+      status: { code: 200, message: 'Workspace data retrieved successfully.' },
+      data: {
+        workspace: WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes],
+        members: @members.map do |user_workspace|
+          {
+            user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
+            role: user_workspace.role,
+            is_creator: user_workspace.user == @workspace.user # Check if the user is the creator
+          }
+        end
+      }
+    }
+  end  
+  
+
   def create
     # puts "Current User: #{current_user.inspect}"
     # puts "Workspace Params: #{workspace_params.inspect}"
