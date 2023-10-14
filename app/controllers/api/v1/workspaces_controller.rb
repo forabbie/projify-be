@@ -98,6 +98,59 @@ class Api::V1::WorkspacesController < ApplicationController
     }
   end
 
+  def workspace_data
+    @workspace = Workspace.find(params[:workspace_id])
+  
+    case params[:data_type]
+    when 'members'
+      @members = @workspace.user_workspaces.includes(:user) # Include user associations for each user_workspace
+      render json: {
+        status: { code: 200, message: 'Workspace members retrieved successfully.' },
+        # data: @members.map do |user_workspace|
+        #   {
+        #     user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
+        #     role: user_workspace.role,
+        #     is_creator: user_workspace.user == @workspace.user # Check if the user is the creator
+        #   }
+        # end
+        data: {
+          workspace: WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes],
+          members: @members.map do |user_workspace|
+            {
+              user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
+              role: user_workspace.role,
+              is_creator: user_workspace.user == @workspace.user
+            }
+          end
+        }
+      }
+    when 'projects'
+      @projects = @workspace.projects
+      project_details = []
+  
+      @projects.each do |project|
+        project_data = project.attributes
+        project_users = User.joins(user_projects: :project)
+                          .where('projects.id = ?', project.id)
+                          .select(:id, :first_name, :last_name, :email, 'user_projects.role AS role')
+        project_data["members"] = project_users
+        project_details << project_data
+      end
+
+      render json: {
+        status: { code: 200, message: 'Workspace projects retrieved successfully.' },
+        # data: project_details
+        data: {
+          workspace: WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes],
+          projects: project_details
+        }
+      }
+    else
+      render json: { error: 'Invalid data_type parameter.' }, status: :unprocessable_entity
+    end
+  end
+  
+
   private
   def workspace_params
     params.require(:workspace).permit(:name, :user)  
