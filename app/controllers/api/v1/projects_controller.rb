@@ -61,23 +61,73 @@ class Api::V1::ProjectsController < ApplicationController
     }
   end
 
-  def add_user
+  def add_member
     @project = Project.find(params[:id])
-    @user = User.find(params[:user_id])
-    @project.users << @user
-
-    if @project.save
-      render json: {
-        status: { code: 200, message: 'User was successfully added to the project.' },
-        data: ProjectSerializer.new(@project).serializable_hash[:data][:attributes]
-      }
+    user_id = params[:user_id]
+    role = params[:role]
+  
+    if @project.users.exists?(user_id)
+      render json: { error: 'User is already a member of the project.' }, status: :unprocessable_entity
+      return
+    end
+  
+    user = User.find(user_id)
+  
+    user_project = UserProject.new(user: user, project: @project, role: role)
+  
+    if user_project.save
+      render json: { message: 'User added to the project with role ' + role + ' successfully.' }
     else
-      render json: {
-        status: { message: 'Failed to add user to the project.' },
-        errors: @project.errors.full_messages
-      }, status: :unprocessable_entity
+      render json: { error: 'Failed to add the user to the project.' }, status: :unprocessable_entity
     end
   end
+  
+
+  def update_member_role
+    @project = Project.find(params[:id])
+    user_id = params[:user_id] # User whose role needs to be updated
+  
+    # Check if the user is a member of the project
+    user = @project.users.find_by(id: user_id)
+  
+    if user.nil?
+      render json: { error: 'User is not a member of the project.' }, status: :unprocessable_entity
+      return
+    end
+  
+    new_role = params[:role] # New role to assign to the user
+  
+    # Update the role for the user within the project
+    user_project = UserProject.find_by(user_id: user_id, project_id: @project.id)
+  
+    if user_project
+      user_project.update(role: new_role)
+      render json: { message: 'User role updated successfully.' }
+    else
+      render json: { error: 'User is not a member of the project.' }, status: :unprocessable_entity
+    end
+  end
+  
+  
+  def remove_member
+    @project = Project.find(params[:id])
+    user_id = params[:user_id]
+  
+    user = @project.users.find_by(id: user_id)
+  
+    if user.nil?
+      render json: { error: 'User is not a member of the project.' }, status: :unprocessable_entity
+      return
+    end
+  
+    @project.users.delete(user)
+  
+    user_project = UserProject.find_by(user_id: user_id, project_id: @project.id)
+    user_project.destroy if user_project
+  
+    render json: { message: 'User removed from the project successfully.' }
+  end
+  
 
   private
   def set_project
@@ -94,9 +144,12 @@ class Api::V1::ProjectsController < ApplicationController
 
   def authorize_workspace_membership
     @workspace = Workspace.find(params[:workspace_id])
-
-    unless @workspace.users.include?(current_user)
-      render json: { error: 'You are not authorized to create a project in this workspace.' }, status: :forbidden
+  
+    user_workspace = UserWorkspace.find_by(workspace: @workspace, user: current_user)
+  
+    unless user_workspace && user_workspace.role == 'admin'
+      render json: { error: 'You are not authorized to create or update a project in this workspace.' }, status: :forbidden
     end
   end
+  
 end
