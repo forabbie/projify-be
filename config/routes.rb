@@ -12,7 +12,9 @@ Rails.application.routes.draw do
       resources :workspaces do
         get '/:data_type', to: 'workspaces#workspace_data', constraints: { data_type: /(members|projects)/ }
         resources :projects, only: [:create, :index] do
-          post 'add_user', on: :member
+          post '/add-member' => 'projects#add_member', on: :member  
+          patch '/role-member' => 'projects#update_member_role', on: :member  
+          delete '/remove-member' => 'projects#remove_member', on: :member  
         end
         resources :invitations, only: [:create, :index]                  
         post '/invitations/send' => 'invitations#send_invitation'
@@ -20,9 +22,9 @@ Rails.application.routes.draw do
     end
   end
   devise_for :users, path: '', path_names: {
-    sign_in: '/auth/signin',
-    sign_out: '/auth/signout',
-    registration: '/signup'
+    sign_in: '/api/v1/auth/signin',
+    sign_out: '/api/v1/auth/signout',
+    registration: '/api/v1/signup'
   },
   controllers: {
     sessions: 'users/sessions',
