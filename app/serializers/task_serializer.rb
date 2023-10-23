@@ -1,16 +1,25 @@
 class TaskSerializer
   include JSONAPI::Serializer
-  attributes :id, :title, :description, :notes, :owner, :project_id
+  attributes :id, :title, :description, :notes, :owner, :project_id, :deadline
 
-  attribute :deadline do |task|
+  attribute :created_at do |task|
     task.created_at.strftime('%m-%d-%Y %H:%M')
   end
 
-  attribute :task_status_name do |task|
-    task.task_status.name
+  attribute :status do |task|
+    task.task_status.id
   end
 
-  attribute :task_priority_name do |task|
-    task.task_priority.name
+  attribute :priority do |task|
+    task.task_priority.id
+  end
+
+  attribute :owner_email do |task|
+    task.user&.email
+  end
+
+  attribute :name do |task|
+    user = task.user
+    "#{user&.first_name} #{user&.last_name}".strip if user
   end
 end

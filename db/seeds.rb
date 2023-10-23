@@ -9,7 +9,7 @@
 def create_task_priorities
   TaskPriority.destroy_all
 
-  priorities = ['high', 'med', 'low']
+  priorities = ['high', 'medium', 'low']
 
   priorities.each do |priority|
     TaskPriority.create!(name: priority)

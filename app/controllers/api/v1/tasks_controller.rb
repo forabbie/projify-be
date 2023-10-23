@@ -1,11 +1,11 @@
 class Api::V1::TasksController < ApplicationController
   before_action :find_project
   before_action :find_task, only: [:show, :update, :destroy]
-  before_action :require_project_membership, only: [:show, :update, :destroy]
+  # before_action :require_project_membership, only: [:update, :destroy]
 
   def index
-    @tasks = @project.tasks
-    task_data = TaskSerializer.new(@tasks).serializable_hash[:data][:attributes]
+    @tasks = @project.tasks.order(:id)
+    task_data = @tasks.map { |task| TaskSerializer.new(task).serializable_hash[:data][:attributes] }
     render json: {
       status: { code: 200, message: 'Tasks retrieve successfully.' },
       data: task_data
@@ -13,7 +13,11 @@ class Api::V1::TasksController < ApplicationController
   end
 
   def show
-    render json: @task
+    task_data = TaskSerializer.new(@task).serializable_hash[:data][:attributes]
+    render json: {
+      status: { code: 200, message: 'Task retrieve successfully.' },
+      data: task_data
+    }
   end
 
   def create
