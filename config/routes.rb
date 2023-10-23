@@ -16,7 +16,7 @@ Rails.application.routes.draw do
           post '/add-member' => 'projects#add_member', on: :member  
           patch '/role-member' => 'projects#update_member_role', on: :member  
           delete '/remove-member' => 'projects#remove_member', on: :member  
-          resources :tasks
+          resources :tasks, only: [:create, :show, :update, :index] 
         end
         resources :invitations, only: [:create, :index]                  
         post '/invitations/send' => 'invitations#send_invitation'
