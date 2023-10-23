@@ -10,11 +10,13 @@ Rails.application.routes.draw do
       post '/invitations/accept' => 'invitations#accept_invitation'
       post '/invitations/decline' => 'invitations#decline_invitation'
       resources :workspaces do
-        get '/:data_type', to: 'workspaces#workspace_data', constraints: { data_type: /(members|projects)/ }
-        resources :projects, only: [:create, :index] do
+        # get '/:data_type', to: 'workspaces#workspace_data', constraints: { data_type: /(members|projects)/ }
+        get '/members', to: 'workspaces#workspace_members'
+        resources :projects, only: [:create, :show, :update, :index] do
           post '/add-member' => 'projects#add_member', on: :member  
           patch '/role-member' => 'projects#update_member_role', on: :member  
           delete '/remove-member' => 'projects#remove_member', on: :member  
+          resources :tasks
         end
         resources :invitations, only: [:create, :index]                  
         post '/invitations/send' => 'invitations#send_invitation'

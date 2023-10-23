@@ -7,15 +7,39 @@ class Api::V1::ProjectsController < ApplicationController
     selected_workspace = Workspace.find(params[:workspace_id])
 
     user_projects_in_workspace = user.user_projects.where(project_id: selected_workspace.projects.pluck(:id))
-    projects_in_workspace = user_projects_in_workspace.map(&:project)
+    projects_in_workspace = user_projects_in_workspace.map(&:project) 
 
     render json: {
       status: { code: 200, message: 'Projects retrieved successfully.' },
-      data: projects_in_workspace
+      data: projects_in_workspace.map { |project| ProjectSerializer.new(project).serializable_hash[:data][:attributes] }
     }
   end
 
   def show
+    @user = current_user
+    @workspace = Workspace.find(params[:workspace_id])
+    workspace_attributes = WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes]
+    is_creator = (@workspace.user == @user)
+    workspace_attributes[:is_creator] = is_creator
+
+    @projects = @workspace.projects
+    project_details = []
+
+    project = Project.find(params[:id])
+    project_data = project.attributes
+    project_users = User.joins(user_projects: :project)
+                      .where('projects.id = ?', project.id)
+                      .select(:id, :first_name, :last_name, :email, 'user_projects.role AS role')
+    project_data["members"] = project_users
+    project_details << project_data
+
+    render json: {
+      status: { code: 200, message: 'Workspace projects retrieved successfully.' },
+      data: {
+        workspace: workspace_attributes,
+        project: project_details
+      }
+    }
   end
 
   def create
@@ -45,6 +69,13 @@ class Api::V1::ProjectsController < ApplicationController
   end
 
   def update
+    @project = Project.find(params[:id])
+
+    if @project.update(project_params)
+      render json: { message: 'Project updated successfully' }
+    else
+      render json: { error: 'Failed to update project', errors: @project.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def destroy

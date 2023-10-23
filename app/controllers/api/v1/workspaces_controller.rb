@@ -22,20 +22,25 @@ class Api::V1::WorkspacesController < ApplicationController
   end
 
   def show
+    @user = current_user
     @workspace = Workspace.find(params[:id])
     @members = @workspace.user_workspaces.includes(:user) # Include user associations for each user_workspace
+    workspace_attributes = WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes]
+    is_creator = (@workspace.user == @user) # Check if the current user is the creator
+    workspace_attributes[:is_creator] = is_creator
+    workspace_attributes
   
     render json: {
       status: { code: 200, message: 'Workspace data retrieved successfully.' },
       data: {
-        workspace: WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes],
-        members: @members.map do |user_workspace|
-          {
-            user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
-            role: user_workspace.role,
-            is_creator: user_workspace.user == @workspace.user # Check if the user is the creator
-          }
-        end
+        workspace: workspace_attributes,
+        # members: @members.map do |user_workspace|
+        #   {
+        #     user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
+        #     role: user_workspace.role,
+        #     is_creator: user_workspace.user == @workspace.user # Check if the user is the creator
+        #   }
+        # end
       }
     }
   end  
@@ -98,62 +103,109 @@ class Api::V1::WorkspacesController < ApplicationController
     }
   end
 
-  def workspace_data
+  def workspace_members
+    @user = current_user
     @workspace = Workspace.find(params[:workspace_id])
+    workspace_attributes = WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes]
+    is_creator = (@workspace.user == @user)
+    workspace_attributes[:is_creator] = is_creator
   
-    case params[:data_type]
-    when 'members'
-      @members = @workspace.user_workspaces.includes(:user) # Include user associations for each user_workspace
-      render json: {
-        status: { code: 200, message: 'Workspace members retrieved successfully.' },
-        # data: @members.map do |user_workspace|
-        #   {
-        #     user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
-        #     role: user_workspace.role,
-        #     is_creator: user_workspace.user == @workspace.user # Check if the user is the creator
-        #   }
-        # end
-        data: {
-          workspace: WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes],
-          members: @members.map do |user_workspace|
-            {
-              user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
-              role: user_workspace.role,
-              is_creator: user_workspace.user == @workspace.user
-            }
-          end
-        }
-      }
-    when 'projects'
-      @projects = @workspace.projects
-      project_details = []
+    @members = @workspace.user_workspaces.includes(:user)
+    @pending_invitations = Invitation.where(workspace_id: @workspace.id, accepted: nil)
   
-      @projects.each do |project|
-        project_data = project.attributes
-        project_users = User.joins(user_projects: :project)
-                          .where('projects.id = ?', project.id)
-                          .select(:id, :first_name, :last_name, :email, 'user_projects.role AS role')
-        project_data["members"] = project_users
-        project_details << project_data
-      end
-
-      render json: {
-        status: { code: 200, message: 'Workspace projects retrieved successfully.' },
-        # data: project_details
-        data: {
-          workspace: WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes],
-          projects: project_details
-        }
+    combined_list = []
+  
+    # Add members to the combined list
+    combined_list += @members.map do |user_workspace|
+      user = user_workspace.user
+      role = user_workspace.role
+      is_admin = role == "admin"
+  
+      {
+        user: UserSerializer.new(user).serializable_hash[:data][:attributes],
+        role: role,
+        is_creator: user == @workspace.user,
+        status: 'accepted'
       }
-    else
-      render json: { error: 'Invalid data_type parameter.' }, status: :unprocessable_entity
     end
+  
+    # Add pending invitations to the combined list
+    combined_list += @pending_invitations.map do |invitation|
+      {
+        user: {
+          email: invitation.recipient_email,
+        },
+        role: "member",
+        is_creator: false,  # Not a creator if it's a pending invitation
+        status: "pending",
+      }
+    end
+  
+    render json: {
+      status: { code: 200, message: 'Workspace members retrieved successfully.' },
+      data: {
+        workspace: workspace_attributes,
+        members: combined_list
+      }
+    }
   end
+  
+  
+
+  # def workspace_data
+  #   @user = current_user
+  #   @workspace = Workspace.find(params[:workspace_id])
+  #   workspace_attributes = WorkspaceSerializer.new(@workspace).serializable_hash[:data][:attributes]
+  #   is_creator = (@workspace.user == @user)
+  #   workspace_attributes[:is_creator] = is_creator
+  #   workspace_attributes
+  
+  #   case params[:data_type]
+  #   when 'members'
+  #     @members = @workspace.user_workspaces.includes(:user)
+  #     render json: {
+  #       status: { code: 200, message: 'Workspace members retrieved successfully.' },
+  #       data: {
+  #         workspace: workspace_attributes,
+  #         members: @members.map do |user_workspace|
+  #           {
+  #             user: UserSerializer.new(user_workspace.user).serializable_hash[:data][:attributes],
+  #             role: user_workspace.role,
+  #             is_creator: user_workspace.user == @workspace.user
+  #           }
+  #         end
+  #       }
+  #     }
+  #   when 'projects'
+  #     @projects = @workspace.projects
+  #     project_details = []
+  
+  #     @projects.each do |project|
+  #       project_data = project.attributes
+  #       project_users = User.joins(user_projects: :project)
+  #                         .where('projects.id = ?', project.id)
+  #                         .select(:id, :first_name, :last_name, :email, 'user_projects.role AS role')
+  #       project_data["members"] = project_users
+  #       project_details << project_data
+  #     end
+
+  #     render json: {
+  #       status: { code: 200, message: 'Workspace projects retrieved successfully.' },
+  #       # data: project_details
+  #       data: {
+  #         workspace: workspace_attributes,
+  #         projects: project_details
+  #       }
+  #     }
+  #   else
+  #     render json: { error: 'Invalid data type parameter.' }, status: :unprocessable_entity
+  #   end
+  # end
   
 
   private
   def workspace_params
-    params.require(:workspace).permit(:name, :user)  
+    params.require(:workspace).permit(:name, :user, :description)  
   end
 
   def find_workspace
@@ -172,7 +224,7 @@ class Api::V1::WorkspacesController < ApplicationController
     user_workspace = UserWorkspace.find_by(workspace_id: @workspace.id, user_id: current_user.id)
     unless user_workspace && user_workspace.role == 'admin'
       render json: {
-        status: { message: 'Unauthorized. You do not have permission to update this workspace.' }
+        message: 'Unauthorized. You do not have permission to update this workspace.'
       }, status: :unauthorized
     end
   end
