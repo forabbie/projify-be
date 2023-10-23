@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_10_08_164043) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_15_195204) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -58,6 +58,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_08_164043) do
     t.bigint "task_status_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "project_id", null: false
+    t.index ["project_id"], name: "index_tasks_on_project_id"
     t.index ["task_priority_id"], name: "index_tasks_on_task_priority_id"
     t.index ["task_status_id"], name: "index_tasks_on_task_status_id"
   end
@@ -110,6 +112,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_08_164043) do
   add_foreign_key "invitations", "users"
   add_foreign_key "invitations", "workspaces"
   add_foreign_key "projects", "workspaces"
+  add_foreign_key "tasks", "projects"
   add_foreign_key "tasks", "task_priorities"
   add_foreign_key "tasks", "task_statuses"
   add_foreign_key "user_projects", "projects"
